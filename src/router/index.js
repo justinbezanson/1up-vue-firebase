@@ -14,6 +14,9 @@ const router = createRouter({
                 requiresAuth: true
             }
         },
+        { path: "/add-player", component: () => import("../views/AddPlayer.vue"), meta: { requiresAuth: true } },
+        { path: "/players", component: () => import("../views/Players.vue"), meta: { requiresAuth: true } },
+        { path: "/add-game", component: () => import("../views/AddGame.vue"), meta: { requiresAuth: true } },
     ]
 });
 

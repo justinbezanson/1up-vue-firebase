@@ -1,0 +1,3 @@
+<template>
+    Add Player
+</template>

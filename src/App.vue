@@ -72,7 +72,6 @@ let mobileMenuHidden = ref('hidden');
 let auth;
 onMounted(() => {
   auth = getAuth();
-  console.log(getAuth().currentUser)
   onAuthStateChanged(auth, (user) => {
     isLoggedIn.value = user ? true : false;
   });
@@ -90,4 +89,6 @@ const toggleButton = () => {
 
 </script>
 
-<style scoped></style>
+<style scoped>
+
+</style>
