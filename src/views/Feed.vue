@@ -1,5 +1,4 @@
 <template>
-
     <div class="flex flex-row-reverse items-end mx-20">
         <button 
             @click="addGame"
@@ -18,7 +17,7 @@
 
     <div class="ml-20 mr-20 mt-0 mb-10 p-10 bg-white rounded-md shadow-lg">
         <div class="relative overflow-x-auto">
-            <h1 class="mb-3 font-bold text-xl text-gray-800">Games Played</h1>
+            <FormTitle title="Games Played" />
             <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-white uppercase bg-blue-600">
                     <tr>
@@ -166,7 +165,7 @@ export default {
     
     methods: {
         addGame(e) {
-            router.push('/add-game');
+            router.push('/game');
         },
 
         playerList(e) {
