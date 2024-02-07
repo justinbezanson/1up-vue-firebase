@@ -10,6 +10,9 @@ import Button from './components/Button.vue';
 import ErrorAlert from './components/ErrorAlert.vue';
 import SuccessAlert from './components/SuccessAlert.vue';
 import FlashMessenger from './components/FlashMessenger.vue';
+import FormSelect from './components/FormSelect.vue';
+import PlusButton from './components/PlusButton.vue';
+import MinusButton from './components/MinusButton.vue';
 
 const app = createApp(App);
 
@@ -22,5 +25,8 @@ app.component('Button', Button)
 app.component('ErrorAlert', ErrorAlert)
 app.component('SuccessAlert', SuccessAlert)
 app.component('FlashMessenger', FlashMessenger)
+app.component('FormSelect', FormSelect)
+app.component('PlusButton', PlusButton)
+app.component('MinusButton', MinusButton)
 
 app.mount('#app');

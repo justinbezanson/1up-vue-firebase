@@ -28,6 +28,12 @@
                             Player
                         </th>
                         <th scope="col" class="px-6 py-3">
+                            Character
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            Vehicle
+                        </th>
+                        <th scope="col" class="px-6 py-3">
                             Place
                         </th>
                         <th scope="col" class="px-6 py-3">
@@ -72,6 +78,12 @@
                                     {{ player.name }}
                                 </td>
                                 <td class="p-2">
+                                    {{ player.character }}
+                                </td>
+                                <td class="p-2">
+                                    {{ player.vehicle }}
+                                </td>
+                                <td class="p-2">
                                     {{ player.place }}
                                 </td>
                                 <td class="p-2">
@@ -81,6 +93,12 @@
                             <tr v-else class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-gray-800">
                                 <td class="p-2">
                                     {{ player.name }}
+                                </td>
+                                <td class="p-2">
+                                    {{ player.character }}
+                                </td>
+                                <td class="p-2">
+                                    {{ player.vehicle }}
                                 </td>
                                 <td class="p-2">
                                     {{ player.place }}
@@ -152,7 +170,9 @@ export default {
                     gameObj.players.push({
                         name: player.data().name,
                         score: player.data().score,
-                        place: player.data().place
+                        place: player.data().place,
+                        vehicle: player.data().vehicle,
+                        character: player.data().character
                     });
                 }
             })
