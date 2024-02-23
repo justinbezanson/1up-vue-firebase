@@ -8,7 +8,16 @@
         :value="modelValue"
         @change="$emit('update:modelValue', $event.target.value)"
     >
-        <option v-for="(text, val) in options" :value="val">{{ text }}</option>
+        <template v-for="(text, val) in options">
+            <template v-if="typeof text === 'object'">
+                <optgroup :label="val">
+                    <option v-for="(text2, val2) in text" :value="val2">{{ text2 }}</option>
+                </optgroup>
+            </template>
+            <template v-else>
+                <option :value="val">{{ text }}</option>
+            </template>
+        </template>
     </select>
     
     <p v-if="errorMessage?.length > 0" class="text-red-500 text-md italic">{{errorMessage}}</p>

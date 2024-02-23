@@ -33,6 +33,7 @@
                                 label="Class"
                                 v-model="form.class"
                                 :options="classes"
+                                :errorMessage="errors?.class"
                             />
                         </div>
 
@@ -41,6 +42,7 @@
                                 label="Courses"
                                 v-model="form.courses"
                                 :options="courses"
+                                :errorMessage="errors?.courses"
                             />
                         </div>
                     </div>
@@ -51,6 +53,7 @@
                                 label="Cpu Vehicles"
                                 v-model="form.cpuVehicles"
                                 :options="cpuVehicles"
+                                :errorMessage="errors?.cpuVehicles"
                             />
                         </div>
 
@@ -59,6 +62,7 @@
                                 label="Items"
                                 v-model="form.items"
                                 :options="items"
+                                :errorMessage="errors?.items"
                             />
                         </div>  
                         
@@ -67,6 +71,7 @@
                                 label="Cpu"
                                 v-model="form.cpu"
                                 :options="cpu"
+                                :errorMessage="errors?.cpu"
                             />
                         </div>
                     </div>
@@ -77,6 +82,7 @@
                                 label="Race Count"
                                 v-model="form.races"
                                 :options="races"
+                                :errorMessage="errors?.races"
                             />
                         </div>  
                     </div>
@@ -118,14 +124,14 @@
                                     <FormSelect
                                         label=""
                                         v-model="player.character"
-                                        :options="playerSelectOptions"
+                                        :options="characters"
                                     />
                                 </td>
                                 <td class="p-2">
                                     <FormSelect
                                         label=""
                                         v-model="player.vehicle"
-                                        :options="playerSelectOptions"
+                                        :options="vehicles"
                                     />
                                 </td>
                                 <td class="p-2 w-8">
@@ -175,10 +181,12 @@ import { db } from '../firebase/index.js';
 import { collection, addDoc, doc, getDoc, updateDoc, getDocs } from "firebase/firestore";
 import router from '../router';
 import FormSelect from '../components/FormSelect.vue';
+import Validation from '../validation';
 
 export default {
     data() {
         return {
+            firstValidation: true,
             rows: 0,
             /** @type {import('../store').GameProps} */
             errors: {
@@ -206,11 +214,11 @@ export default {
             messages: {
                 date: 'Please select a date',
                 class: 'Please select a class',
-                courses: '',
-                cpuVehicles: '',
-                items: '',
-                cpu: '',
-                races: '',
+                courses: 'Please select a course type',
+                cpuVehicles: 'Please select cpu vehicles',
+                items: 'Please select items',
+                cpu: 'Please select a cpu difficulty',
+                races: 'Please select number of races',
                 players: []
             },
             error: '',
@@ -240,14 +248,13 @@ export default {
     watch: {
         form: {
             handler(val) {
-                console.log(this.form)
                 this.validate();
             },
             deep: true
         }
     },
     computed: {
-        ...mapState(['classes', 'courses', 'cpuVehicles', 'items', 'cpu', 'races']),
+        ...mapState(['classes', 'courses', 'cpuVehicles', 'items', 'cpu', 'races', 'vehicles', 'characters']),
 
         formTitle() {
             if (this.game.length > 0) {
@@ -348,6 +355,9 @@ export default {
                     console.error(e);
                 }
             }
+            
+            console.log(this.form)
+            console.log(this.errors)
         },
         
         /**
@@ -356,14 +366,25 @@ export default {
          * @returns {boolean}
          */
         validate() {
+            if(this.firstValidation) {
+                this.firstValidation = false;
+                return true;
+            }
+
             let valid = true;
             
             this.clearErrors();
 
-            if (this.form.date.length === 0) {
-                this.errors.date = this.messages.date;
-                valid = false;
-            }
+            valid = Validation.isNotEmpty('date', this);
+            valid = Validation.isNotEmpty('class', this);
+            valid = Validation.isNotEmpty('courses', this);
+            valid = Validation.isNotEmpty('cpuVehicles', this);
+            valid = Validation.isNotEmpty('items', this);
+            valid = Validation.isNotEmpty('cpu', this);
+            valid = Validation.isNotEmpty('races', this);
+
+            //players
+            
             return valid;
         },
 
