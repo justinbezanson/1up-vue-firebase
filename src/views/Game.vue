@@ -118,6 +118,7 @@
                                         v-model="player.playerId"
                                         :options="playerSelectOptions"
                                         @update:model-value="updatedPlayer($event, index)"
+                                        :errorMessage="errors?.players[index].name"
                                     />
                                 </td>
                                 <td class="p-2">
@@ -125,6 +126,7 @@
                                         label=""
                                         v-model="player.character"
                                         :options="characters"
+                                        :errorMessage="errors?.players[index].character"
                                     />
                                 </td>
                                 <td class="p-2">
@@ -132,22 +134,23 @@
                                         label=""
                                         v-model="player.vehicle"
                                         :options="vehicles"
+                                        :errorMessage="errors?.players[index].vehicle"
                                     />
                                 </td>
                                 <td class="p-2 w-8">
                                     <FormInput 
                                         label=""
                                         :value="player.place" 
-                                        errorMessage="" 
                                         @input-updated="e => form.players[index].place = e.target.value" 
+                                        :errorMessage="errors?.players[index].place"
                                     />
                                 </td>
                                 <td class="p-2 w-8">
                                     <FormInput 
                                         label=""
-                                        :value="player.score" 
-                                        errorMessage="" 
-                                        @input-updated="e => form.players[index].score = e.target.value" 
+                                        :value="player.score"
+                                        @input-updated="e => form.players[index].score = e.target.value"
+                                        :errorMessage="errors?.players[index].score"
                                     />
                                 </td>
                                 <td class="p-2 w-4">
@@ -210,7 +213,7 @@ export default {
                 races: '',
                 players: []
             },
-            /** @type {import('../store').GameProps} */
+            /** @type {import('../store').GamePropsMessages} */
             messages: {
                 date: 'Please select a date',
                 class: 'Please select a class',
@@ -219,7 +222,13 @@ export default {
                 items: 'Please select items',
                 cpu: 'Please select a cpu difficulty',
                 races: 'Please select number of races',
-                players: []
+                players: {
+                    name: 'Please select a player',
+                    character: 'Please select a character',
+                    vehicle: 'Please select a vehicle',
+                    place: 'Please enter a place',
+                    score: 'Please enter a score'
+                }
             },
             error: '',
             success: '',
@@ -313,6 +322,18 @@ export default {
          * clear current errors
          */
         clearErrors() {
+            let playerErrors = [];
+
+            this.form.players.forEach(player => {
+                const row = {};
+
+                for(const key in player) {
+                    row[key] = '';
+                }
+
+                playerErrors.push(row);
+            });
+
             this.errors = {
                 date: '',
                 class: '',
@@ -321,7 +342,7 @@ export default {
                 items: '',
                 cpu: '',
                 races: '',
-                players: []
+                players: playerErrors
             };
         },
 
@@ -382,6 +403,14 @@ export default {
             valid = Validation.isNotEmpty('items', this);
             valid = Validation.isNotEmpty('cpu', this);
             valid = Validation.isNotEmpty('races', this);
+
+            this.form.players.forEach((player, index) => {
+                valid = Validation.isNotEmpty({ data: 'players', index: index, property: 'name' }, this);
+                valid = Validation.isNotEmpty({ data: 'players', index: index, property: 'character' }, this);
+                valid = Validation.isNotEmpty({ data: 'players', index: index, property: 'vehicle' }, this);
+                valid = Validation.isNotEmpty({ data: 'players', index: index, property: 'place' }, this);
+                valid = Validation.isNotEmpty({ data: 'players', index: index, property: 'score' }, this);
+            })
 
             //players
             

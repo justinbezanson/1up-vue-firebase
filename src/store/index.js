@@ -31,6 +31,27 @@ import { createStore } from 'vuex';
  * */
 
 /**
+ * @typedef {Object} GamePropsMessagesPlayer
+ * @property {string} name
+ * @property {string} character
+ * @property {string} vehicle
+ * @property {string} place
+ * @property {string} score
+ */
+
+/** 
+ * @typedef {Object} GamePropsMessages 
+ * @property {string} date
+ * @property {string} class 
+ * @property {string} courses
+ * @property {string} cpuVehicles
+ * @property {string} items
+ * @property {string} cpu
+ * @property {string} races
+ * @property {GamePropsMessagesPlayer} players
+ * */
+
+/**
  * @typedef {Object} Player
  * @property {string} name
  * @property {string} id
