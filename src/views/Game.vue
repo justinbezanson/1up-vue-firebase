@@ -181,7 +181,7 @@
 <script>
 import { mapMutations, mapState } from 'vuex'
 import { db } from '../firebase/index.js';
-import { collection, addDoc, doc, getDoc, updateDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc, updateDoc, getDocs, serverTimestamp, query, where, orderBy, deleteDoc } from "firebase/firestore";
 import router from '../router';
 import FormSelect from '../components/FormSelect.vue';
 import Validation from '../validation';
@@ -244,9 +244,31 @@ export default {
         await this.getAvailablePlayers();
 
         if (this.hasGameId) {
-            // this.player = this.$route.params.id.toString();
-            // const results = await getDoc(doc(db, 'players', this.player));
-            // this.form.name = results.data().name
+            const results = await getDoc(doc(db, 'games', this.gameId));
+            this.form.date = results.data().date;
+            this.form.class = results.data().class;
+            this.form.courses = results.data().courses;
+            this.form.cpuVehicles = results.data().cpu_vehicles;
+            this.form.items = results.data().items;
+            this.form.cpu = results.data().cpu;
+            this.form.races = results.data().races;
+
+            const q = query(collection(db, 'games_players'), where('game_id' , '==', this.gameId), orderBy('place', 'asc'))
+            const playerResults = await getDocs(q);
+            playerResults.forEach(row => {
+                /** @type {import('../store').GamePlayer} */
+                const player = {
+                    gameId: this.gameId, 
+                    character: row.data().character,
+                    name: row.data().name,
+                    playerId: row.data().player_id,
+                    place: row.data().place,
+                    score: row.data().score,
+                    vehicle: row.data().vehicle
+                };
+
+                this.form.players.push(player);
+            });
         } else {
             this.form.date = new Date().toLocaleDateString('en-CA');
             this.addPlayerRow();
@@ -353,32 +375,78 @@ export default {
             if (this.validate()) {
                 try {
                     /** @type {import('../store').FlashMessenger} */
-                    // const message = {
-                    //     title: 'Success',
-                    //     message: `Player "${this.form.name}" was `
-                    // };
-                    // if(this.game.length > 0) {
-                    //     await updateDoc(doc(db, "players", this.game), {
-                    //         name: this.form.name
-                    //     });
-                    //     message.message += 'updated';
-                    // } else {
-                    //     await addDoc(collection(db, "players"), {
-                    //         name: this.form.name
-                    //     });
-                    //     message.message += 'added';
-                    // }
-                    // this.setFlashMessage(message);
-                    // router.push('/players');
+                    const message = {
+                        title: 'Success',
+                        message: 'Game was '
+                    };
+                    if(this.hasGameId) {                        
+                        //delete existing game_players
+                        const q = query(collection(db, 'games_players'), where('game_id' , '==', this.gameId), orderBy('place', 'asc'))
+                        const playerResults = await getDocs(q);
+                        playerResults.forEach(row => {
+                            deleteDoc(doc(db, 'games_players', row.id));
+                        });
+
+                        await updateDoc(doc(db, "games", this.gameId), {
+                            date: this.form.date,
+                            class: this.form.class,
+                            courses: this.form.courses,
+                            cpu_vehicles: this.form.cpuVehicles,
+                            items: this.form.items,
+                            cpu: this.form.cpu,
+                            races: this.form.races,
+                            created: serverTimestamp()
+                        });
+
+                        for(const player of this.form.players) {
+                            await addDoc(collection(db, "games_players"), {
+                                created: serverTimestamp(),
+                                game_id: this.gameId,
+                                character: player.character,
+                                name: player.name,
+                                player_id: player.playerId,
+                                place: player.place,
+                                score: player.score,
+                                vehicle: player.vehicle
+                            })
+                        }
+                        
+                        message.message += 'updated';
+                    } else {
+                        const gameRef = await addDoc(collection(db, "games"), {
+                            date: this.form.date,
+                            class: this.form.class,
+                            courses: this.form.courses,
+                            cpu_vehicles: this.form.cpuVehicles,
+                            items: this.form.items,
+                            cpu: this.form.cpu,
+                            races: this.form.races,
+                            created: serverTimestamp()
+                        });
+
+                        for(const player of this.form.players) {
+                            await addDoc(collection(db, "games_players"), {
+                                created: serverTimestamp(),
+                                game_id: gameRef.id,
+                                character: player.character,
+                                name: player.name,
+                                player_id: player.playerId,
+                                place: player.place,
+                                score: player.score,
+                                vehicle: player.vehicle
+                            });
+                        }
+
+                        message.message += 'added';
+                    }
+                    this.setFlashMessage(message);
+                    router.push('/feed');
                 }
                 catch (e) {
-                    this.error = 'Could not save new player';
+                    this.error = 'Could not save game';
                     console.error(e);
                 }
             }
-            
-            console.log(this.form)
-            console.log(this.errors)
         },
         
         /**

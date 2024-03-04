@@ -63,12 +63,14 @@
                                     <div style="clear:both;" class="pt-1 flex flex-row">
                                         <button 
                                             class="flex items-center justify-center focus:outline-none text-white text-sm sm:text-base bg-blue-600 hover:bg-blue-700 rounded m-1 mr-0 p-1 transition duration-150 ease-in"
+                                            @click="() => { editGame(game.id); }"
                                         >
                                             Edit
                                         </button>
 
                                         <button 
                                             class="flex items-center justify-center focus:outline-none text-white text-sm sm:text-base bg-blue-600 hover:bg-blue-700 rounded m-1 mr-0 p-1 transition duration-150 ease-in"
+                                            @click="() => { deleteGame(game.id) }"
                                         >
                                             Delete
                                         </button>
@@ -130,7 +132,7 @@
 
 <script>
 import { db } from '../firebase/index.js';
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, query, where, doc, getDoc } from "firebase/firestore";
 import router from '../router';
 
 export default {
@@ -155,6 +157,7 @@ export default {
 
         games.forEach((game) => {
             let gameObj = {
+                id: game.id,
                 created: game.data().created,
                 class: game.data().class,
                 courses: game.data().courses,
@@ -184,6 +187,26 @@ export default {
     },
     
     methods: {
+        editGame(id) {
+            router.push('/game/' + id);
+        },
+
+        async deleteGame(id) {
+            if(confirm('Are you sure you want to delete this game?')) {
+                //delete existing game_players
+                const q = query(collection(db, 'games_players'), where('game_id' , '==', id))
+                const playerResults = await getDocs(q);
+                playerResults.forEach(row => {
+                    deleteDoc(doc(db, 'games_players', row.id));
+                });
+
+                const game = await getDoc(doc(db, 'games', id));
+                deleteDoc(doc(db, 'games', game.id));
+
+                this.games = this.games.filter(game => game.id !== id);
+            }
+        },
+
         addGame(e) {
             router.push('/game');
         },
