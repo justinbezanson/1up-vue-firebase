@@ -181,7 +181,7 @@
 <script>
 import { mapMutations, mapState } from 'vuex'
 import { db } from '../firebase/index.js';
-import { collection, addDoc, doc, getDoc, updateDoc, getDocs, serverTimestamp, query, where, orderBy, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc, updateDoc, getDocs, serverTimestamp, query, where, orderBy, deleteDoc, limit } from "firebase/firestore";
 import router from '../router';
 import FormSelect from '../components/FormSelect.vue';
 import Validation from '../validation';
@@ -271,7 +271,9 @@ export default {
             });
         } else {
             this.form.date = new Date().toLocaleDateString('en-CA');
-            this.addPlayerRow();
+            if(!this.loadRecentGame()) {
+                this.addPlayerRow();
+            }
         }
 
         this.loading = false;
@@ -311,6 +313,50 @@ export default {
     methods: {
         ...mapMutations(['setFlashMessage']),
 
+        /**
+         * load data from most recent game as starting point
+         * @returns {Promise<boolean>}
+         */
+        async loadRecentGame() {
+            const gameQuery = query(collection(db, 'games'), orderBy('created', 'desc'), limit(1))
+            const results = await getDocs(gameQuery);
+
+            if(results.docs.length > 0) {
+                const game = results.docs[0].data();
+
+                this.form.class = game.class;
+                this.form.courses = game.courses;
+                this.form.cpuVehicles = game.cpu_vehicles;
+                this.form.items = game.items;
+                this.form.cpu = game.cpu;
+                this.form.races = game.races;
+
+                const q = query(collection(db, 'games_players'), where('game_id' , '==', results.docs.at(0).id), orderBy('place', 'asc'))
+                const playerResults = await getDocs(q);
+                playerResults.forEach(row => {
+                    /** @type {import('../store').GamePlayer} */
+                    const player = {
+                        gameId: '', 
+                        character: row.data().character,
+                        name: row.data().name,
+                        playerId: row.data().player_id,
+                        place: '',
+                        score: '',
+                        vehicle: row.data().vehicle
+                    };
+
+                    this.form.players.push(player);
+                });
+                    
+                return true;
+            }
+
+            return false;
+        },
+
+        /**
+         * 
+         */
         updatedPlayer(e, index) {
             //update name
             for(const player of this.players) {
@@ -479,8 +525,6 @@ export default {
                 valid = Validation.isNotEmpty({ data: 'players', index: index, property: 'place' }, this);
                 valid = Validation.isNotEmpty({ data: 'players', index: index, property: 'score' }, this);
             })
-
-            //players
             
             return valid;
         },
