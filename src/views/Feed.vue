@@ -44,7 +44,7 @@
                 <tbody>
                     <template v-if="!loading" v-for="(game, gameIndex) in games">
                         <template v-for="(player, playerIndex) in sortedPlayers(game)">
-                            <tr v-if="playerIndex === 0" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-gray-800">
+                            <tr v-if="playerIndex === 0" style="border-top: 2px solid gray !important;" class="bg-white border-t border-b dark:bg-gray-800 dark:border-gray-700 text-gray-800">
                                 <td 
                                     scope="row" 
                                     style="width: 325px;"
