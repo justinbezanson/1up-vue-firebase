@@ -8,7 +8,7 @@
 
             <!-- primary nav -->
             <div class="hidden md:flex items-center space-x-1 float-right">
-              <router-link to="/" class="text-blue-600 font-semibold hover:text-blue-800 pr-3">Home</router-link>
+              <router-link to="/" class="text-blue-600 font-semibold hover:text-blue-800 pr-3">Stats</router-link>
               <router-link to="/feed" class="text-blue-600 font-semibold hover:text-blue-800 pr-3">Games</router-link>
               <router-link v-if="!isLoggedIn" to="/sign-in" class="text-blue-600 font-semibold hover:text-blue-800 pr-3">Login</router-link>
             </div>

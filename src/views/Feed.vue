@@ -53,7 +53,7 @@
                                     :rowspan="game.players.length"
                                     valign="top"
                                 >
-                                    <div class="font-bold text-lg mb-1">{{ game.created.toDate().toDateString() }}</div>
+                                    <div class="font-bold text-lg mb-1">{{ new Date(game.date).toUTCString().split(' 00:00:00')[0] }}</div>
                                     <div v-for="column in columns" class="columns-1 gap-4" style="float: left;">
                                         <div class="mb-1 mr-1 h-8 w-32 break-inside-avoid rounded-md bg-blue-100 p-1 text-gray-800">
                                             {{ column.label }}: {{ game[column.column] }}
@@ -159,6 +159,7 @@ export default {
             let gameObj = {
                 id: game.id,
                 created: game.data().created,
+                date: game.data().date,
                 class: game.data().class,
                 courses: game.data().courses,
                 cpu_vehicles: game.data().cpu_vehicles,

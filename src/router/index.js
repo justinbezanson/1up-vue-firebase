@@ -4,8 +4,8 @@ import { createRouter, createWebHistory } from "vue-router";
 const router = createRouter({
     history: createWebHistory(),
     routes: [
-        { path: "/", component: () => import("../views/Home.vue") },
-        { path: "/register", component: () => import("../views/Register.vue") },
+        { path: "/", component: () => import("../views/Home.vue"), meta: { requiresAuth: true } },
+        //{ path: "/register", component: () => import("../views/Register.vue") },
         { path: "/sign-in", component: () => import("../views/SignIn.vue") },
         { 
             path: "/feed", 
@@ -40,7 +40,7 @@ router.beforeEach(async (to, from, next) => {
         if(await getCurrentUser()) {
             next();
         } else {
-            router.push('/');
+            router.push('/sign-in');
         }
     } else {
         next();
