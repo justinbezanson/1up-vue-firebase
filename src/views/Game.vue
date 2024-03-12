@@ -445,6 +445,7 @@ export default {
                         });
 
                         for(const player of this.form.players) {
+                            //TODO: update stats
                             await addDoc(collection(db, "games_players"), {
                                 created: serverTimestamp(),
                                 game_id: this.gameId,
@@ -471,6 +472,7 @@ export default {
                         });
 
                         for(const player of this.form.players) {
+                            //TODO update stats
                             await addDoc(collection(db, "games_players"), {
                                 created: serverTimestamp(),
                                 game_id: gameRef.id,

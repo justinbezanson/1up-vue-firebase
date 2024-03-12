@@ -132,7 +132,7 @@
 
 <script>
 import { db } from '../firebase/index.js';
-import { collection, getDocs, deleteDoc, query, where, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, query, where, doc, getDoc, orderBy, addDoc } from "firebase/firestore";
 import router from '../router';
 
 export default {
@@ -152,7 +152,8 @@ export default {
     },
 
     async mounted() {
-        let games = await getDocs(collection(db, 'games'));
+        const q = query(collection(db, 'games'), orderBy('date', 'desc'), orderBy('created', 'desc'))
+        let games = await getDocs(q);
         let players = await getDocs(collection(db, 'games_players'));
 
         games.forEach((game) => {
