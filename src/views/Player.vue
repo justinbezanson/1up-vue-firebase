@@ -102,9 +102,20 @@ export default {
 
                         message.message += 'updated';
                     } else {
-                        await addDoc(collection(db, "players"), {
+                        const playerRef = await addDoc(collection(db, "players"), {
                             name: this.form.name
                         });
+
+                        const newStats = {
+                            player_id: playerRef.id, 
+                            name: this.form.name, 
+                            games: 0,
+                            '1': 0,
+                            '2': 0,
+                            '3': 0
+                        };
+
+                        await addDoc(collection(db, "stats"), newStats);
 
                         message.message += 'added';
                     }

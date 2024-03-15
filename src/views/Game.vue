@@ -472,7 +472,6 @@ export default {
                         });
 
                         for(const player of this.form.players) {
-                            //TODO update stats
                             await addDoc(collection(db, "games_players"), {
                                 created: serverTimestamp(),
                                 game_id: gameRef.id,
@@ -483,6 +482,28 @@ export default {
                                 score: player.score,
                                 vehicle: player.vehicle
                             });
+
+                            //update stats
+                            const q = query(collection(db, 'stats'), where('player_id' , '==', player.playerId))
+                            const results = await getDocs(q);
+
+                            if(results.size > 0) {
+                                results.forEach(async result => {
+                                    const stat = {
+                                        player_id: result.data().player_id, 
+                                        name: result.data().name, 
+                                        games: result.data().games,
+                                        '1': result.data()['1'],
+                                        '2': result.data()['2'],
+                                        '3': result.data()['3']
+                                    };
+
+                                    stat.games++;
+                                    stat[player.place]++;
+
+                                    await updateDoc(doc(db, "stats", result.id), stat);
+                                });
+                            }
                         }
 
                         message.message += 'added';

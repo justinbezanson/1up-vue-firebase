@@ -58,7 +58,7 @@
 <script>
 
 import { db } from '../firebase/index.js';
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, where, query } from "firebase/firestore";
 import router from '../router';
 
 export default {
@@ -90,6 +90,12 @@ export default {
         async deletePlayer(id) {
             //TODO: prevent deleting if player has game data
             if(confirm('Are you sure you want to delete this player?')) {
+                const q = query(collection(db, 'stats'), where('player_id' , '==', id))
+                const results = await getDocs(q);
+
+                if(results.size > 0) {
+                    results.forEach(async result => await deleteDoc(doc(db, 'stats', result.id)));
+                }
                 await deleteDoc(doc(db, 'players', id));
 
                 this.players = [];
