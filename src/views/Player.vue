@@ -33,7 +33,7 @@
 <script>
 import { mapMutations } from 'vuex'
 import { db } from '../firebase/index.js';
-import { collection, addDoc, doc, getDoc, updateDoc } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc, updateDoc, getDocs, query, where } from "firebase/firestore";
 import router from '../router';
 
 export default {
@@ -98,6 +98,16 @@ export default {
                     if(this.player.length > 0) {
                         await updateDoc(doc(db, "players", this.player), {
                             name: this.form.name
+                        });
+
+                        //update name on stats record
+                        const q = query(collection(db, 'stats'), where('player_id', '==', this.player))
+                        const results = await getDocs(q);
+
+                        results.forEach(async stat => {
+                            await updateDoc(doc(db, "stats", stat.id), {
+                                name: this.form.name
+                            });
                         });
 
                         message.message += 'updated';

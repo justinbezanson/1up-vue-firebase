@@ -499,7 +499,10 @@ export default {
                                     };
 
                                     stat.games++;
-                                    stat[player.place]++;
+                                    
+                                    if(parseInt(player.place) > 0 && parseInt(player.place) < 4) {
+                                        stat[player.place]++;
+                                    }
 
                                     await updateDoc(doc(db, "stats", result.id), stat);
                                 });
