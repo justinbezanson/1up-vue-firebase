@@ -132,7 +132,7 @@
 
 <script>
 import { db } from '../firebase/index.js';
-import { collection, getDocs, deleteDoc, query, where, doc, getDoc, orderBy, addDoc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, query, where, doc, getDoc, orderBy, addDoc, updateDoc } from "firebase/firestore";
 import router from '../router';
 
 export default {
@@ -198,9 +198,34 @@ export default {
                 //delete existing game_players
                 const q = query(collection(db, 'games_players'), where('game_id' , '==', id))
                 const playerResults = await getDocs(q);
-                playerResults.forEach(row => {
+                playerResults.forEach(async row => {
+                    //decrement player stats
+                    const q = query(collection(db, 'stats'), where('player_id', '==', row.data().player_id))
+                    const results = await getDocs(q);
+
+                    results.forEach(async stat => {
+                        const newStat = {
+                            player_id: stat.data().player_id, 
+                            name: stat.data().name, 
+                            games: stat.data().games,
+                            '1': stat.data()['1'],
+                            '2': stat.data()['2'],
+                            '3': stat.data()['3']
+                        };
+
+                        newStat['games']--;
+
+                        if(parseInt(row.data().place) > 0 && parseInt(row.data().place) < 4) {                            
+                            newStat[row.data().place]--;
+                        }
+
+                        await updateDoc(doc(db, "stats", stat.id), newStat);
+                    });
+
+                    //delete 
                     deleteDoc(doc(db, 'games_players', row.id));
                 });
+
 
                 const game = await getDoc(doc(db, 'games', id));
                 deleteDoc(doc(db, 'games', game.id));

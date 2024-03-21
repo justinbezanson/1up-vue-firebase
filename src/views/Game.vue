@@ -429,8 +429,32 @@ export default {
                         //delete existing game_players
                         const q = query(collection(db, 'games_players'), where('game_id' , '==', this.gameId), orderBy('place', 'asc'))
                         const playerResults = await getDocs(q);
-                        playerResults.forEach(row => {
-                            deleteDoc(doc(db, 'games_players', row.id));
+
+                        playerResults.forEach(async row => {
+                            //decrement stats
+                            const q = query(collection(db, 'stats'), where('player_id', '==', row.data().player_id))
+                            const results = await getDocs(q);
+
+                            results.forEach(async stat => {
+                                const newStat = {
+                                    player_id: stat.data().player_id, 
+                                    name: stat.data().name, 
+                                    games: stat.data().games,
+                                    '1': stat.data()['1'],
+                                    '2': stat.data()['2'],
+                                    '3': stat.data()['3']
+                                };
+
+                                newStat['games']--;
+                                
+                                if(parseInt(row.data().place) > 0 && parseInt(row.data().place) < 4) {                                    
+                                    newStat[row.data().place]--;                                    
+                                }
+
+                                await updateDoc(doc(db, "stats", stat.id), newStat);
+                            });
+                            
+                            await deleteDoc(doc(db, 'games_players', row.id));
                         });
 
                         await updateDoc(doc(db, "games", this.gameId), {
@@ -445,7 +469,29 @@ export default {
                         });
 
                         for(const player of this.form.players) {
-                            //TODO: update stats
+                            //increment stats
+                            const q = query(collection(db, 'stats'), where('player_id', '==', player.playerId))
+                            const results = await getDocs(q);
+
+                            results.forEach(async stat => {
+                                const newStat = {
+                                    player_id: stat.data().player_id, 
+                                    name: stat.data().name, 
+                                    games: stat.data().games,
+                                    '1': stat.data()['1'],
+                                    '2': stat.data()['2'],
+                                    '3': stat.data()['3']
+                                };
+
+                                newStat['games']++;
+
+                                if(parseInt(player.place) > 0 && parseInt(player.place) < 4) {                           
+                                    newStat[player.place]++;                                                                      
+                                }
+
+                                await updateDoc(doc(db, "stats", stat.id), newStat);
+                            });
+                            
                             await addDoc(collection(db, "games_players"), {
                                 created: serverTimestamp(),
                                 game_id: this.gameId,
